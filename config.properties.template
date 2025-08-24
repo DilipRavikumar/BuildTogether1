@@ -1,0 +1,28 @@
+# BuildTogether Configuration File
+# Copy this file to config.properties and update the values as needed
+
+# Database Configuration
+database.url=jdbc:oracle:thin:@localhost:1521:XE
+database.username=buildtogether
+database.password=password
+
+# Application Settings
+team.max_size=5
+hackathon.max_teams=50
+app.date_format=yyyy-MM-dd HH:mm:ss
+app.debug=false
+app.log_level=INFO
+
+# File Paths
+sql.scripts.dir=sql/
+logs.dir=logs/
+
+# Connection Pool Settings (if implemented in future)
+db.pool.initial_size=5
+db.pool.max_size=20
+db.pool.timeout=30000
+
+# Security Settings
+password.min_length=6
+username.min_length=3
+username.max_length=20
