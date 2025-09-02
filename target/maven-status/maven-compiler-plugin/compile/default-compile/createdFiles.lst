@@ -1,7 +1,9 @@
 com\buildtogether\entity\TeamMember.class
+com\buildtogether\config\CorsConfig.class
 com\buildtogether\controller\TeamMemberController.class
 com\buildtogether\entity\Hackathon.class
 com\buildtogether\entity\UserSkill$ProficiencyLevel.class
+com\buildtogether\entity\TeamMember$RoleInTeam.class
 com\buildtogether\exception\ResourceNotFoundException.class
 com\buildtogether\exception\ValidationException.class
 com\buildtogether\repository\SkillRepository.class

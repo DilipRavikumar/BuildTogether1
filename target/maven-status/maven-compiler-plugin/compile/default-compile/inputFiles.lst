@@ -7,6 +7,7 @@ C:\Users\dilip\Documents\BuildTogether\BuildTogether\src\main\java\com\buildtoge
 C:\Users\dilip\Documents\BuildTogether\BuildTogether\src\main\java\com\buildtogether\entity\UserSkillId.java
 C:\Users\dilip\Documents\BuildTogether\BuildTogether\src\main\java\com\buildtogether\exception\ResourceAlreadyExistsException.java
 C:\Users\dilip\Documents\BuildTogether\BuildTogether\src\main\java\com\buildtogether\exception\ResourceNotFoundException.java
+C:\Users\dilip\Documents\BuildTogether\BuildTogether\src\main\java\com\buildtogether\config\CorsConfig.java
 C:\Users\dilip\Documents\BuildTogether\BuildTogether\src\main\java\com\buildtogether\controller\UserController.java
 C:\Users\dilip\Documents\BuildTogether\BuildTogether\src\main\java\com\buildtogether\controller\SubmissionController.java
 C:\Users\dilip\Documents\BuildTogether\BuildTogether\src\main\java\com\buildtogether\exception\ValidationException.java

@@ -33,9 +33,10 @@ public class TeamMember {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @NotBlank(message = "Role in team is required")
+    @NotNull(message = "Role in team is required")
+    @Enumerated(EnumType.STRING)
     @Column(name = "role_in_team", nullable = false)
-    private String roleInTeam;
+    private RoleInTeam roleInTeam;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -54,5 +55,9 @@ public class TeamMember {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public enum RoleInTeam {
+        TEAM_LEAD, DEVELOPER, DESIGNER, PRODUCT_MANAGER, DATA_SCIENTIST, DEVOPS_ENGINEER, UI_UX_DESIGNER
     }
 }

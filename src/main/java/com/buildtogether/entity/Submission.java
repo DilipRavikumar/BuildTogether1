@@ -76,6 +76,12 @@ public class Submission {
     @Column(name = "judge_comments", columnDefinition = "TEXT")
     private String judgeComments;
 
+    @NotNull(message = "Submitted by is required")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "submitted_by", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User submittedBy;
+
     public enum SubmissionStatus {
         SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED
     }

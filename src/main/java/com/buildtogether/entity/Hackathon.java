@@ -52,6 +52,12 @@ public class Hackathon {
     @Column(name = "max_team_size", columnDefinition = "INT DEFAULT 5")
     private Integer maxTeamSize = 5;
 
+    @NotNull(message = "Created by is required")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "created_by", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User createdBy;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

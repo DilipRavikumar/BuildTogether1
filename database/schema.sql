@@ -59,9 +59,11 @@ CREATE TABLE hackathon (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     max_team_size NUMBER(3) DEFAULT 5 CHECK (max_team_size > 0 AND max_team_size <= 10),
+    created_by NUMBER(19) NOT NULL,
     created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
     updated_at TIMESTAMP DEFAULT SYSTIMESTAMP,
-    CONSTRAINT chk_hackathon_dates CHECK (end_date > start_date)
+    CONSTRAINT chk_hackathon_dates CHECK (end_date > start_date),
+    CONSTRAINT fk_hackathon_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE team (
@@ -79,7 +81,7 @@ CREATE TABLE team (
 CREATE TABLE team_member (
     team_id NUMBER(19) NOT NULL,
     user_id NUMBER(19) NOT NULL,
-    role_in_team VARCHAR2(50) NOT NULL CHECK (role_in_team IN ('Team Lead', 'Developer', 'Designer', 'Product Manager', 'Data Scientist', 'DevOps Engineer', 'UI/UX Designer')),
+    role_in_team VARCHAR2(50) NOT NULL CHECK (role_in_team IN ('TEAM_LEAD', 'DEVELOPER', 'DESIGNER', 'PRODUCT_MANAGER', 'DATA_SCIENTIST', 'DEVOPS_ENGINEER', 'UI_UX_DESIGNER')),
     created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
     updated_at TIMESTAMP DEFAULT SYSTIMESTAMP,
     PRIMARY KEY (team_id, user_id),
@@ -107,22 +109,29 @@ CREATE TABLE submission (
     project_description CLOB,
     github_link VARCHAR2(255),
     demo_link VARCHAR2(255),
+    presentation_link VARCHAR2(255),
+    technologies CLOB,
+    features CLOB,
     score NUMBER(5,2) CHECK (score >= 0 AND score <= 100),
     judge_comments CLOB,
     status VARCHAR2(20) DEFAULT 'SUBMITTED' CHECK (status IN ('SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED')),
+    submitted_by NUMBER(19) NOT NULL,
     submitted_at TIMESTAMP DEFAULT SYSTIMESTAMP,
     updated_at TIMESTAMP DEFAULT SYSTIMESTAMP,
     CONSTRAINT fk_submission_team FOREIGN KEY (team_id) REFERENCES team(id) ON DELETE CASCADE,
-    CONSTRAINT fk_submission_hackathon FOREIGN KEY (hackathon_id) REFERENCES hackathon(id) ON DELETE CASCADE
+    CONSTRAINT fk_submission_hackathon FOREIGN KEY (hackathon_id) REFERENCES hackathon(id) ON DELETE CASCADE,
+    CONSTRAINT fk_submission_submitted_by FOREIGN KEY (submitted_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_hackathon_created_by ON hackathon(created_by);
 CREATE INDEX idx_team_hackathon ON team(hackathon_id);
 CREATE INDEX idx_team_created_by ON team(created_by);
 CREATE INDEX idx_join_request_status ON join_request(status);
 CREATE INDEX idx_submission_status ON submission(status);
 CREATE INDEX idx_submission_team_hackathon ON submission(team_id, hackathon_id);
+CREATE INDEX idx_submission_submitted_by ON submission(submitted_by);
 CREATE INDEX idx_user_skill_user ON user_skill(user_id);
 CREATE INDEX idx_user_skill_skill ON user_skill(skill_id);
 CREATE INDEX idx_team_member_team ON team_member(team_id);
