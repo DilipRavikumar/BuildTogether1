@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "hackathon")
+@Table(name = "dr_hackathon")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +35,7 @@ public class Hackathon {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "CLOB")
     private String description;
 
     @NotNull(message = "Start date is required")
@@ -49,7 +49,7 @@ public class Hackathon {
     private LocalDate endDate;
 
     @Min(value = 1, message = "Max team size must be at least 1")
-    @Column(name = "max_team_size", columnDefinition = "INT DEFAULT 5")
+    @Column(name = "max_team_size", columnDefinition = "NUMBER(3) DEFAULT 5")
     private Integer maxTeamSize = 5;
 
     @NotNull(message = "Created by is required")

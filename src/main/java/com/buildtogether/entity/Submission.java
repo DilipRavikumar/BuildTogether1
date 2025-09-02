@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "submission")
+@Table(name = "dr_submission")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -44,7 +44,7 @@ public class Submission {
     private String projectTitle;
 
     @NotBlank(message = "Project description is required")
-    @Column(name = "project_description", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "project_description", columnDefinition = "CLOB", nullable = false)
     private String projectDescription;
 
     @Column(name = "github_link")
@@ -56,10 +56,10 @@ public class Submission {
     @Column(name = "presentation_link")
     private String presentationLink;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "CLOB")
     private String technologies;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "CLOB")
     private String features;
 
     @CreatedDate
@@ -67,13 +67,13 @@ public class Submission {
     private LocalDateTime submittedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "VARCHAR(20) DEFAULT 'SUBMITTED'")
+    @Column(columnDefinition = "VARCHAR2(20) DEFAULT 'SUBMITTED'")
     private SubmissionStatus status = SubmissionStatus.SUBMITTED;
 
     @Column(precision = 5, scale = 2, columnDefinition = "DECIMAL(5,2) DEFAULT 0.00")
     private BigDecimal score = BigDecimal.ZERO;
 
-    @Column(name = "judge_comments", columnDefinition = "TEXT")
+    @Column(name = "judge_comments", columnDefinition = "CLOB")
     private String judgeComments;
 
     @NotNull(message = "Submitted by is required")

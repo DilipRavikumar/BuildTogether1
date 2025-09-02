@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_skill")
+@Table(name = "dr_user_skill")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

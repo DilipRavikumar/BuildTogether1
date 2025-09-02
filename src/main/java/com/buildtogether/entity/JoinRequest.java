@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "join_request")
+@Table(name = "dr_join_request")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +35,7 @@ public class JoinRequest {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "VARCHAR(20) DEFAULT 'PENDING'")
+    @Column(columnDefinition = "VARCHAR2(20) DEFAULT 'PENDING'")
     private RequestStatus status = RequestStatus.PENDING;
 
     @CreatedDate
