@@ -23,7 +23,8 @@ import java.util.Set;
 public class Skill {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "skill_seq")
+    @SequenceGenerator(name = "skill_seq", sequenceName = "skill_seq", allocationSize = 1)
     private Long id;
 
     @NotBlank(message = "Skill name is required")
@@ -38,7 +39,6 @@ public class Skill {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relationships
     @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "skill"})
     private Set<UserSkill> userSkills = new HashSet<>();

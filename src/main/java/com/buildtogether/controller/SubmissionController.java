@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/submissions")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class SubmissionController {
 
     private final SubmissionRepository submissionRepository;
@@ -91,13 +90,9 @@ public class SubmissionController {
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Submission>> getSubmissionsByStatus(@PathVariable String status) {
         log.info("Fetching submissions with status: {}", status);
-        try {
-            Submission.SubmissionStatus submissionStatus = Submission.SubmissionStatus.valueOf(status.toUpperCase());
-            List<Submission> submissions = submissionRepository.findByStatus(submissionStatus);
-            return ResponseEntity.ok(submissions);
-        } catch (IllegalArgumentException e) {
-            throw new ResourceNotFoundException("Invalid status: " + status);
-        }
+        Submission.SubmissionStatus submissionStatus = Submission.SubmissionStatus.valueOf(status.toUpperCase());
+        List<Submission> submissions = submissionRepository.findByStatus(submissionStatus);
+        return ResponseEntity.ok(submissions);
     }
 
     @GetMapping("/team-hackathon")
@@ -134,12 +129,8 @@ public class SubmissionController {
         Submission submission = submissionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Submission", "id", id));
         
-        try {
-            Submission.SubmissionStatus submissionStatus = Submission.SubmissionStatus.valueOf(status.toUpperCase());
-            submission.setStatus(submissionStatus);
-        } catch (IllegalArgumentException e) {
-            throw new ResourceNotFoundException("Invalid status: " + status);
-        }
+        Submission.SubmissionStatus submissionStatus = Submission.SubmissionStatus.valueOf(status.toUpperCase());
+        submission.setStatus(submissionStatus);
         
         Submission updatedSubmission = submissionRepository.save(submission);
         return ResponseEntity.ok(updatedSubmission);

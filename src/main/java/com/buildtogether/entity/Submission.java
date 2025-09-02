@@ -23,7 +23,8 @@ import java.time.LocalDateTime;
 public class Submission {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "submission_seq")
+    @SequenceGenerator(name = "submission_seq", sequenceName = "submission_seq", allocationSize = 1)
     private Long id;
 
     @NotNull(message = "Team is required")

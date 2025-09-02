@@ -16,7 +16,6 @@ import java.util.List;
 @RequestMapping("/team-members")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class TeamMemberController {
 
     private final TeamMemberRepository teamMemberRepository;

@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/hackathons")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class HackathonController {
 
     private final HackathonRepository hackathonRepository;
@@ -23,14 +22,9 @@ public class HackathonController {
     @GetMapping
     public ResponseEntity<List<Hackathon>> getAllHackathons() {
         log.info("=== GET /hackathons - Fetching all hackathons ===");
-        try {
-            List<Hackathon> hackathons = hackathonRepository.findAll();
-            log.info("Successfully fetched {} hackathons", hackathons.size());
-            return ResponseEntity.ok(hackathons);
-        } catch (Exception e) {
-            log.error("Error fetching all hackathons: {}", e.getMessage(), e);
-            throw e;
-        }
+        List<Hackathon> hackathons = hackathonRepository.findAll();
+        log.info("Successfully fetched {} hackathons", hackathons.size());
+        return ResponseEntity.ok(hackathons);
     }
 
     @GetMapping("/{id}")
@@ -77,13 +71,8 @@ public class HackathonController {
     @GetMapping("/active")
     public ResponseEntity<List<Hackathon>> getActiveHackathons() {
         log.info("=== GET /hackathons/active - Fetching active hackathons ===");
-        try {
-            List<Hackathon> activeHackathons = hackathonRepository.findByActiveStatus();
-            log.info("Successfully fetched {} active hackathons", activeHackathons.size());
-            return ResponseEntity.ok(activeHackathons);
-        } catch (Exception e) {
-            log.error("Error fetching active hackathons: {}", e.getMessage(), e);
-            throw e;
-        }
+        List<Hackathon> activeHackathons = hackathonRepository.findByActiveStatus();
+        log.info("Successfully fetched {} active hackathons", activeHackathons.size());
+        return ResponseEntity.ok(activeHackathons);
     }
 }

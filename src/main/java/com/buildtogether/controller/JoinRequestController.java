@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/join-requests")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class JoinRequestController {
 
     private final JoinRequestRepository joinRequestRepository;
@@ -82,13 +81,9 @@ public class JoinRequestController {
     @GetMapping("/status/{status}")
     public ResponseEntity<List<JoinRequest>> getJoinRequestsByStatus(@PathVariable String status) {
         log.info("Fetching join requests with status: {}", status);
-        try {
-            JoinRequest.RequestStatus requestStatus = JoinRequest.RequestStatus.valueOf(status.toUpperCase());
-            List<JoinRequest> joinRequests = joinRequestRepository.findByStatus(requestStatus);
-            return ResponseEntity.ok(joinRequests);
-        } catch (IllegalArgumentException e) {
-            throw new ResourceNotFoundException("Invalid status: " + status);
-        }
+        JoinRequest.RequestStatus requestStatus = JoinRequest.RequestStatus.valueOf(status.toUpperCase());
+        List<JoinRequest> joinRequests = joinRequestRepository.findByStatus(requestStatus);
+        return ResponseEntity.ok(joinRequests);
     }
 
     @GetMapping("/check")

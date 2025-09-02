@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/skills")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class SkillController {
 
     private final SkillRepository skillRepository;

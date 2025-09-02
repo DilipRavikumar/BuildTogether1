@@ -25,7 +25,8 @@ import java.util.Set;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_seq")
+    @SequenceGenerator(name = "users_seq", sequenceName = "users_seq", allocationSize = 1)
     private Long id;
 
     @NotBlank(message = "Name is required")
@@ -64,7 +65,6 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relationships
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
     private Set<UserSkill> userSkills = new HashSet<>();
@@ -81,7 +81,6 @@ public class User {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "createdBy"})
     private Set<Team> createdTeams = new HashSet<>();
 
-    // Helper methods
     public void addUserSkill(UserSkill userSkill) {
         userSkills.add(userSkill);
         userSkill.setUser(this);

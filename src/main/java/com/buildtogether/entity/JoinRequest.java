@@ -20,7 +20,8 @@ import java.time.LocalDateTime;
 public class JoinRequest {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "join_request_seq")
+    @SequenceGenerator(name = "join_request_seq", sequenceName = "join_request_seq", allocationSize = 1)
     private Long id;
 
     @NotNull(message = "Team is required")

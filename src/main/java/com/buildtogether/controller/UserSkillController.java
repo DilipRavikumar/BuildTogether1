@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/user-skills")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class UserSkillController {
 
     private final UserSkillRepository userSkillRepository;
@@ -82,13 +81,9 @@ public class UserSkillController {
     @GetMapping("/proficiency/{level}")
     public ResponseEntity<List<UserSkill>> getUserSkillsByProficiencyLevel(@PathVariable String level) {
         log.info("Fetching user skills with proficiency level: {}", level);
-        try {
-            UserSkill.ProficiencyLevel proficiencyLevel = UserSkill.ProficiencyLevel.valueOf(level.toUpperCase());
-            List<UserSkill> userSkills = userSkillRepository.findByProficiencyLevel(proficiencyLevel);
-            return ResponseEntity.ok(userSkills);
-        } catch (IllegalArgumentException e) {
-            throw new ResourceNotFoundException("Invalid proficiency level: " + level);
-        }
+        UserSkill.ProficiencyLevel proficiencyLevel = UserSkill.ProficiencyLevel.valueOf(level.toUpperCase());
+        List<UserSkill> userSkills = userSkillRepository.findByProficiencyLevel(proficiencyLevel);
+        return ResponseEntity.ok(userSkills);
     }
 
     @GetMapping("/check")

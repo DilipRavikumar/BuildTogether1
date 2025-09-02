@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/teams")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class TeamController {
 
     private final TeamRepository teamRepository;
@@ -23,14 +22,9 @@ public class TeamController {
     @GetMapping
     public ResponseEntity<List<Team>> getAllTeams() {
         log.info("=== GET /teams - Fetching all teams ===");
-        try {
-            List<Team> teams = teamRepository.findAll();
-            log.info("Successfully fetched {} teams", teams.size());
-            return ResponseEntity.ok(teams);
-        } catch (Exception e) {
-            log.error("Error fetching all teams: {}", e.getMessage(), e);
-            throw e;
-        }
+        List<Team> teams = teamRepository.findAll();
+        log.info("Successfully fetched {} teams", teams.size());
+        return ResponseEntity.ok(teams);
     }
 
     @GetMapping("/{id}")
@@ -47,14 +41,9 @@ public class TeamController {
         log.info("Team details: name={}, hackathonId={}, createdBy={}", 
                 team.getTeamName(), team.getHackathon().getId(), team.getCreatedBy().getId());
         
-        try {
-            Team savedTeam = teamRepository.save(team);
-            log.info("Successfully created team: {} (ID: {})", savedTeam.getTeamName(), savedTeam.getId());
-            return ResponseEntity.ok(savedTeam);
-        } catch (Exception e) {
-            log.error("Error creating team {}: {}", team.getTeamName(), e.getMessage(), e);
-            throw e;
-        }
+        Team savedTeam = teamRepository.save(team);
+        log.info("Successfully created team: {} (ID: {})", savedTeam.getTeamName(), savedTeam.getId());
+        return ResponseEntity.ok(savedTeam);
     }
 
     @PutMapping("/{id}")

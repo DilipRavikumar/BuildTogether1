@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserRepository userRepository;
@@ -23,31 +22,18 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         log.info("=== GET /users - Fetching all users ===");
-        try {
-            List<User> users = userRepository.findAll();
-            log.info("Successfully fetched {} users", users.size());
-            return ResponseEntity.ok(users);
-        } catch (Exception e) {
-            log.error("Error fetching all users: {}", e.getMessage(), e);
-            throw e;
-        }
+        List<User> users = userRepository.findAll();
+        log.info("Successfully fetched {} users", users.size());
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         log.info("=== GET /users/{} - Fetching user by ID ===", id);
-        try {
-            User user = userRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
-            log.info("Successfully fetched user: {} (ID: {})", user.getName(), user.getId());
-            return ResponseEntity.ok(user);
-        } catch (ResourceNotFoundException e) {
-            log.warn("User not found with ID: {}", id);
-            throw e;
-        } catch (Exception e) {
-            log.error("Error fetching user with ID {}: {}", id, e.getMessage(), e);
-            throw e;
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        log.info("Successfully fetched user: {} (ID: {})", user.getName(), user.getId());
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/email/{email}")
@@ -61,13 +47,9 @@ public class UserController {
     @GetMapping("/role/{role}")
     public ResponseEntity<List<User>> getUsersByRole(@PathVariable String role) {
         log.info("Fetching users with role: {}", role);
-        try {
-            User.UserRole userRole = User.UserRole.valueOf(role.toUpperCase());
-            List<User> users = userRepository.findByRole(userRole);
-            return ResponseEntity.ok(users);
-        } catch (IllegalArgumentException e) {
-            throw new ResourceNotFoundException("Invalid role: " + role);
-        }
+        User.UserRole userRole = User.UserRole.valueOf(role.toUpperCase());
+        List<User> users = userRepository.findByRole(userRole);
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/search")
@@ -82,19 +64,14 @@ public class UserController {
         log.info("=== POST /users - Creating new user ===");
         log.info("User details: email={}, name={}, role={}", user.getEmail(), user.getName(), user.getRole());
         
-        try {
-            if (userRepository.existsByEmail(user.getEmail())) {
-                log.warn("User creation failed: Email already exists - {}", user.getEmail());
-                throw new ResourceNotFoundException("User already exists with email: " + user.getEmail());
-            }
-            
-            User savedUser = userRepository.save(user);
-            log.info("Successfully created user: {} (ID: {})", savedUser.getName(), savedUser.getId());
-            return ResponseEntity.ok(savedUser);
-        } catch (Exception e) {
-            log.error("Error creating user with email {}: {}", user.getEmail(), e.getMessage(), e);
-            throw e;
+        if (userRepository.existsByEmail(user.getEmail())) {
+            log.warn("User creation failed: Email already exists - {}", user.getEmail());
+            throw new ResourceNotFoundException("User already exists with email: " + user.getEmail());
         }
+        
+        User savedUser = userRepository.save(user);
+        log.info("Successfully created user: {} (ID: {})", savedUser.getName(), savedUser.getId());
+        return ResponseEntity.ok(savedUser);
     }
 
     @PutMapping("/{id}")

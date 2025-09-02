@@ -27,7 +27,8 @@ import java.util.Set;
 public class Hackathon {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hackathon_seq")
+    @SequenceGenerator(name = "hackathon_seq", sequenceName = "hackathon_seq", allocationSize = 1)
     private Long id;
 
     @NotBlank(message = "Title is required")
@@ -59,7 +60,6 @@ public class Hackathon {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relationships
     @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "hackathon"})
     private Set<Team> teams = new HashSet<>();
