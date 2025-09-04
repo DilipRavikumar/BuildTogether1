@@ -27,8 +27,7 @@ import java.util.Set;
 public class Hackathon {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hackathon_seq")
-    @SequenceGenerator(name = "hackathon_seq", sequenceName = "hackathon_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "Title is required")
@@ -49,7 +48,7 @@ public class Hackathon {
     private LocalDate endDate;
 
     @Min(value = 1, message = "Max team size must be at least 1")
-    @Column(name = "max_team_size", columnDefinition = "NUMBER(3) DEFAULT 5")
+    @Column(name = "max_team_size", columnDefinition = "INT DEFAULT 5")
     private Integer maxTeamSize = 5;
 
     @NotNull(message = "Created by is required")

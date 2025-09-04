@@ -23,8 +23,7 @@ import java.util.Set;
 public class Skill {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "skill_seq")
-    @SequenceGenerator(name = "skill_seq", sequenceName = "skill_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "Skill name is required")

@@ -1,18 +1,22 @@
 package com.buildtogether.controller;
 
+import com.buildtogether.dto.SubmissionDTO;
 import com.buildtogether.entity.Submission;
 import com.buildtogether.repository.SubmissionRepository;
 import com.buildtogether.exception.ResourceNotFoundException;
+import com.buildtogether.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/submissions")
+@RequestMapping("/api/v1/submissions")
 @RequiredArgsConstructor
 @Slf4j
 public class SubmissionController {
@@ -20,30 +24,37 @@ public class SubmissionController {
     private final SubmissionRepository submissionRepository;
 
     @GetMapping
-    public ResponseEntity<List<Submission>> getAllSubmissions() {
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<SubmissionDTO>> getAllSubmissions() {
         log.info("Fetching all submissions");
         List<Submission> submissions = submissionRepository.findAll();
-        return ResponseEntity.ok(submissions);
+        List<SubmissionDTO> submissionDTOs = submissions.stream()
+                .map(SubmissionDTO::fromSubmission)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(submissionDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Submission> getSubmissionById(@PathVariable Long id) {
+    @Transactional(readOnly = true)
+    public ResponseEntity<SubmissionDTO> getSubmissionById(@PathVariable Long id) {
         log.info("Fetching submission with id: {}", id);
         Submission submission = submissionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Submission", "id", id));
-        return ResponseEntity.ok(submission);
+        SubmissionDTO submissionDTO = SubmissionDTO.fromSubmission(submission);
+        return ResponseEntity.ok(submissionDTO);
     }
 
     @PostMapping
-    public ResponseEntity<Submission> createSubmission(@Valid @RequestBody Submission submission) {
+    public ResponseEntity<SubmissionDTO> createSubmission(@Valid @RequestBody Submission submission) {
         log.info("Creating new submission for team: {} and hackathon: {}", 
                 submission.getTeam().getId(), submission.getHackathon().getId());
         Submission savedSubmission = submissionRepository.save(submission);
-        return ResponseEntity.ok(savedSubmission);
+        SubmissionDTO submissionDTO = SubmissionDTO.fromSubmission(savedSubmission);
+        return ResponseEntity.ok(submissionDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Submission> updateSubmission(@PathVariable Long id, @Valid @RequestBody Submission submissionDetails) {
+    public ResponseEntity<SubmissionDTO> updateSubmission(@PathVariable Long id, @Valid @RequestBody Submission submissionDetails) {
         log.info("Updating submission with id: {}", id);
         Submission submission = submissionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Submission", "id", id));
@@ -60,10 +71,12 @@ public class SubmissionController {
         submission.setJudgeComments(submissionDetails.getJudgeComments());
         
         Submission updatedSubmission = submissionRepository.save(submission);
-        return ResponseEntity.ok(updatedSubmission);
+        SubmissionDTO submissionDTO = SubmissionDTO.fromSubmission(updatedSubmission);
+        return ResponseEntity.ok(submissionDTO);
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> deleteSubmission(@PathVariable Long id) {
         log.info("Deleting submission with id: {}", id);
         if (!submissionRepository.existsById(id)) {
@@ -74,37 +87,57 @@ public class SubmissionController {
     }
 
     @GetMapping("/team/{teamId}")
-    public ResponseEntity<List<Submission>> getSubmissionsByTeam(@PathVariable Long teamId) {
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<SubmissionDTO>> getSubmissionsByTeam(@PathVariable Long teamId) {
         log.info("Fetching submissions for team: {}", teamId);
         List<Submission> submissions = submissionRepository.findByTeamId(teamId);
-        return ResponseEntity.ok(submissions);
+        List<SubmissionDTO> submissionDTOs = submissions.stream()
+                .map(SubmissionDTO::fromSubmission)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(submissionDTOs);
     }
 
     @GetMapping("/hackathon/{hackathonId}")
-    public ResponseEntity<List<Submission>> getSubmissionsByHackathon(@PathVariable Long hackathonId) {
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<SubmissionDTO>> getSubmissionsByHackathon(@PathVariable Long hackathonId) {
         log.info("Fetching submissions for hackathon: {}", hackathonId);
         List<Submission> submissions = submissionRepository.findByHackathonId(hackathonId);
-        return ResponseEntity.ok(submissions);
+        List<SubmissionDTO> submissionDTOs = submissions.stream()
+                .map(SubmissionDTO::fromSubmission)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(submissionDTOs);
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Submission>> getSubmissionsByStatus(@PathVariable String status) {
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<SubmissionDTO>> getSubmissionsByStatus(@PathVariable String status) {
         log.info("Fetching submissions with status: {}", status);
-        Submission.SubmissionStatus submissionStatus = Submission.SubmissionStatus.valueOf(status.toUpperCase());
-        List<Submission> submissions = submissionRepository.findByStatus(submissionStatus);
-        return ResponseEntity.ok(submissions);
+        try {
+            Submission.SubmissionStatus submissionStatus = Submission.SubmissionStatus.valueOf(status.toUpperCase());
+            List<Submission> submissions = submissionRepository.findByStatus(submissionStatus);
+            List<SubmissionDTO> submissionDTOs = submissions.stream()
+                    .map(SubmissionDTO::fromSubmission)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(submissionDTOs);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Invalid status value: " + status + ". Valid statuses are: SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED");
+        }
     }
 
     @GetMapping("/team-hackathon")
-    public ResponseEntity<List<Submission>> getSubmissionsByTeamAndHackathon(
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<SubmissionDTO>> getSubmissionsByTeamAndHackathon(
             @RequestParam Long teamId, @RequestParam Long hackathonId) {
         log.info("Fetching submissions for team: {} and hackathon: {}", teamId, hackathonId);
         List<Submission> submissions = submissionRepository.findByTeamIdAndHackathonId(teamId, hackathonId);
-        return ResponseEntity.ok(submissions);
+        List<SubmissionDTO> submissionDTOs = submissions.stream()
+                .map(SubmissionDTO::fromSubmission)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(submissionDTOs);
     }
 
     @PutMapping("/{id}/score")
-    public ResponseEntity<Submission> updateSubmissionScore(
+    public ResponseEntity<SubmissionDTO> updateSubmissionScore(
             @PathVariable Long id, 
             @RequestParam Double score, 
             @RequestParam(required = false) String judgeComments) {
@@ -118,11 +151,12 @@ public class SubmissionController {
         }
         
         Submission updatedSubmission = submissionRepository.save(submission);
-        return ResponseEntity.ok(updatedSubmission);
+        SubmissionDTO submissionDTO = SubmissionDTO.fromSubmission(updatedSubmission);
+        return ResponseEntity.ok(submissionDTO);
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Submission> updateSubmissionStatus(
+    public ResponseEntity<SubmissionDTO> updateSubmissionStatus(
             @PathVariable Long id, 
             @RequestParam String status) {
         log.info("Updating status for submission: {} to: {}", id, status);
@@ -133,6 +167,7 @@ public class SubmissionController {
         submission.setStatus(submissionStatus);
         
         Submission updatedSubmission = submissionRepository.save(submission);
-        return ResponseEntity.ok(updatedSubmission);
+        SubmissionDTO submissionDTO = SubmissionDTO.fromSubmission(updatedSubmission);
+        return ResponseEntity.ok(submissionDTO);
     }
 }

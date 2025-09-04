@@ -1,49 +1,93 @@
 package com.buildtogether.controller;
 
+import com.buildtogether.dto.HackathonDTO;
 import com.buildtogether.entity.Hackathon;
 import com.buildtogether.repository.HackathonRepository;
 import com.buildtogether.exception.ResourceNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/hackathons")
+@RequestMapping("/api/v1/hackathons")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Hackathon Management", description = "APIs for managing hackathons and events")
 public class HackathonController {
 
     private final HackathonRepository hackathonRepository;
 
     @GetMapping
-    public ResponseEntity<List<Hackathon>> getAllHackathons() {
+    @Operation(summary = "Get all hackathons")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched all hackathons",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = HackathonDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<HackathonDTO>> getAllHackathons() {
         log.info("=== GET /hackathons - Fetching all hackathons ===");
         List<Hackathon> hackathons = hackathonRepository.findAll();
-        log.info("Successfully fetched {} hackathons", hackathons.size());
-        return ResponseEntity.ok(hackathons);
+        List<HackathonDTO> hackathonDTOs = hackathons.stream()
+                .map(HackathonDTO::fromHackathon)
+                .collect(Collectors.toList());
+        log.info("Successfully fetched {} hackathons", hackathonDTOs.size());
+        return ResponseEntity.ok(hackathonDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Hackathon> getHackathonById(@PathVariable Long id) {
+    @Operation(summary = "Get hackathon by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched hackathon",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = HackathonDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Hackathon not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @Transactional(readOnly = true)
+    public ResponseEntity<HackathonDTO> getHackathonById(@PathVariable Long id) {
         log.info("Fetching hackathon with id: {}", id);
         Hackathon hackathon = hackathonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hackathon", "id", id));
-        return ResponseEntity.ok(hackathon);
+        HackathonDTO hackathonDTO = HackathonDTO.fromHackathon(hackathon);
+        return ResponseEntity.ok(hackathonDTO);
     }
 
     @PostMapping
-    public ResponseEntity<Hackathon> createHackathon(@Valid @RequestBody Hackathon hackathon) {
+    @Operation(summary = "Create new hackathon")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully created hackathon",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = HackathonDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<HackathonDTO> createHackathon(@Valid @RequestBody Hackathon hackathon) {
         log.info("Creating new hackathon: {}", hackathon.getTitle());
         Hackathon savedHackathon = hackathonRepository.save(hackathon);
-        return ResponseEntity.ok(savedHackathon);
+        HackathonDTO hackathonDTO = HackathonDTO.fromHackathon(savedHackathon);
+        return ResponseEntity.ok(hackathonDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Hackathon> updateHackathon(@PathVariable Long id, @Valid @RequestBody Hackathon hackathonDetails) {
+    @Operation(summary = "Update hackathon by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated hackathon",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = HackathonDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Hackathon not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<HackathonDTO> updateHackathon(@PathVariable Long id, @Valid @RequestBody Hackathon hackathonDetails) {
         log.info("Updating hackathon with id: {}", id);
         Hackathon hackathon = hackathonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hackathon", "id", id));
@@ -55,10 +99,18 @@ public class HackathonController {
         hackathon.setMaxTeamSize(hackathonDetails.getMaxTeamSize());
         
         Hackathon updatedHackathon = hackathonRepository.save(hackathon);
-        return ResponseEntity.ok(updatedHackathon);
+        HackathonDTO hackathonDTO = HackathonDTO.fromHackathon(updatedHackathon);
+        return ResponseEntity.ok(hackathonDTO);
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete hackathon by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully deleted hackathon"),
+            @ApiResponse(responseCode = "404", description = "Hackathon not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @Transactional
     public ResponseEntity<Void> deleteHackathon(@PathVariable Long id) {
         log.info("Deleting hackathon with id: {}", id);
         if (!hackathonRepository.existsById(id)) {
@@ -69,10 +121,20 @@ public class HackathonController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<Hackathon>> getActiveHackathons() {
-        log.info("=== GET /hackathons/active - Fetching active hackathons ===");
+    @Operation(summary = "Get active hackathons")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched active hackathons",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = HackathonDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<HackathonDTO>> getActiveHackathons() {
+        log.info("=== GET /hackathons - Fetching active hackathons ===");
         List<Hackathon> activeHackathons = hackathonRepository.findByActiveStatus();
-        log.info("Successfully fetched {} active hackathons", activeHackathons.size());
-        return ResponseEntity.ok(activeHackathons);
+        List<HackathonDTO> activeHackathonDTOs = activeHackathons.stream()
+                .map(HackathonDTO::fromHackathon)
+                .collect(Collectors.toList());
+        log.info("Successfully fetched {} active hackathons", activeHackathonDTOs.size());
+        return ResponseEntity.ok(activeHackathonDTOs);
     }
 }

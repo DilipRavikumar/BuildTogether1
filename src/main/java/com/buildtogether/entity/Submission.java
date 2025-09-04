@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
@@ -23,8 +23,7 @@ import java.time.LocalDateTime;
 public class Submission {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "submission_seq")
-    @SequenceGenerator(name = "submission_seq", sequenceName = "submission_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull(message = "Team is required")
@@ -67,7 +66,7 @@ public class Submission {
     private LocalDateTime submittedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "VARCHAR2(20) DEFAULT 'SUBMITTED'")
+    @Column(length = 20)
     private SubmissionStatus status = SubmissionStatus.SUBMITTED;
 
     @Column(precision = 5, scale = 2, columnDefinition = "DECIMAL(5,2) DEFAULT 0.00")

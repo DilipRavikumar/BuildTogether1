@@ -1,18 +1,21 @@
 package com.buildtogether.controller;
 
+import com.buildtogether.dto.TeamDTO;
 import com.buildtogether.entity.Team;
 import com.buildtogether.repository.TeamRepository;
 import com.buildtogether.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/teams")
+@RequestMapping("/api/v1/teams")
 @RequiredArgsConstructor
 @Slf4j
 public class TeamController {
@@ -20,34 +23,41 @@ public class TeamController {
     private final TeamRepository teamRepository;
 
     @GetMapping
-    public ResponseEntity<List<Team>> getAllTeams() {
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<TeamDTO>> getAllTeams() {
         log.info("=== GET /teams - Fetching all teams ===");
         List<Team> teams = teamRepository.findAll();
-        log.info("Successfully fetched {} teams", teams.size());
-        return ResponseEntity.ok(teams);
+        List<TeamDTO> teamDTOs = teams.stream()
+                .map(TeamDTO::fromTeam)
+                .collect(Collectors.toList());
+        log.info("Successfully fetched {} teams", teamDTOs.size());
+        return ResponseEntity.ok(teamDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Team> getTeamById(@PathVariable Long id) {
+    @Transactional(readOnly = true)
+    public ResponseEntity<TeamDTO> getTeamById(@PathVariable Long id) {
         log.info("Fetching team with id: {}", id);
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
-        return ResponseEntity.ok(team);
+        TeamDTO teamDTO = TeamDTO.fromTeam(team);
+        return ResponseEntity.ok(teamDTO);
     }
 
     @PostMapping
-    public ResponseEntity<Team> createTeam(@Valid @RequestBody Team team) {
+    public ResponseEntity<TeamDTO> createTeam(@Valid @RequestBody Team team) {
         log.info("=== POST /teams - Creating new team ===");
         log.info("Team details: name={}, hackathonId={}, createdBy={}", 
                 team.getTeamName(), team.getHackathon().getId(), team.getCreatedBy().getId());
         
         Team savedTeam = teamRepository.save(team);
-        log.info("Successfully created team: {} (ID: {})", savedTeam.getTeamName(), savedTeam.getId());
-        return ResponseEntity.ok(savedTeam);
+        TeamDTO teamDTO = TeamDTO.fromTeam(savedTeam);
+        log.info("Successfully created team: {} (ID: {})", teamDTO.getTeamName(), teamDTO.getId());
+        return ResponseEntity.ok(teamDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Team> updateTeam(@PathVariable Long id, @Valid @RequestBody Team teamDetails) {
+    public ResponseEntity<TeamDTO> updateTeam(@PathVariable Long id, @Valid @RequestBody Team teamDetails) {
         log.info("Updating team with id: {}", id);
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id));
@@ -57,10 +67,12 @@ public class TeamController {
         team.setCreatedBy(teamDetails.getCreatedBy());
         
         Team updatedTeam = teamRepository.save(team);
-        return ResponseEntity.ok(updatedTeam);
+        TeamDTO teamDTO = TeamDTO.fromTeam(updatedTeam);
+        return ResponseEntity.ok(teamDTO);
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> deleteTeam(@PathVariable Long id) {
         log.info("Deleting team with id: {}", id);
         if (!teamRepository.existsById(id)) {
@@ -71,16 +83,24 @@ public class TeamController {
     }
 
     @GetMapping("/hackathon/{hackathonId}")
-    public ResponseEntity<List<Team>> getTeamsByHackathon(@PathVariable Long hackathonId) {
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<TeamDTO>> getTeamsByHackathon(@PathVariable Long hackathonId) {
         log.info("Fetching teams for hackathon: {}", hackathonId);
         List<Team> teams = teamRepository.findByHackathonId(hackathonId);
-        return ResponseEntity.ok(teams);
+        List<TeamDTO> teamDTOs = teams.stream()
+                .map(TeamDTO::fromTeam)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(teamDTOs);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Team>> getTeamsByUser(@PathVariable Long userId) {
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<TeamDTO>> getTeamsByUser(@PathVariable Long userId) {
         log.info("Fetching teams for user: {}", userId);
         List<Team> teams = teamRepository.findByCreatedById(userId);
-        return ResponseEntity.ok(teams);
+        List<TeamDTO> teamDTOs = teams.stream()
+                .map(TeamDTO::fromTeam)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(teamDTOs);
     }
 }

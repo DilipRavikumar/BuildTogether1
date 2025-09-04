@@ -20,8 +20,7 @@ import java.time.LocalDateTime;
 public class JoinRequest {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "join_request_seq")
-    @SequenceGenerator(name = "join_request_seq", sequenceName = "join_request_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull(message = "Team is required")
@@ -35,7 +34,7 @@ public class JoinRequest {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "VARCHAR2(20) DEFAULT 'PENDING'")
+    @Column(length = 20)
     private RequestStatus status = RequestStatus.PENDING;
 
     @CreatedDate

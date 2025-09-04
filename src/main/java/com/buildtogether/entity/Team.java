@@ -24,8 +24,7 @@ import java.util.Set;
 public class Team {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "team_seq")
-    @SequenceGenerator(name = "team_seq", sequenceName = "team_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull(message = "Hackathon is required")
